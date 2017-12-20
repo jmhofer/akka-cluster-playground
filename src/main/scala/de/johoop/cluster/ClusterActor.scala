@@ -3,9 +3,20 @@ package de.johoop.cluster
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent._
+import akka.cluster.sharding.ShardRegion
+import de.johoop.protocol.DomainEvent
 
 object ClusterActor {
   def props: Props = Props[ClusterActor]
+
+  def extractEntityId: ShardRegion.ExtractEntityId = {
+    case e: DomainEvent => (e.id, e)
+    case _ => throw new IllegalArgumentException("Cannot retrieve ID from unknown message")
+  }
+
+  def extractShardId: ShardRegion.ExtractShardId = {
+    case e: DomainEvent => e.id
+  }
 }
 
 class ClusterActor extends Actor with ActorLogging {
