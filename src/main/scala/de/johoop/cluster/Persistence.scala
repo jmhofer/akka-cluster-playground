@@ -18,7 +18,7 @@ object Persistence {
     }
 
     def retrieve(id: ProductId): Future[Option[ProductWithOffers]] = {
-      println(s"failed to retrieve $id, because I'm too dump")
+      println(s"failed to retrieve $id, because I'm too dumb")
       Future successful None
     }
   }
