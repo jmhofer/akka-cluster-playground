@@ -11,6 +11,7 @@ import de.johoop.cluster.model.ProductId
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 object Main {
 
@@ -22,29 +23,33 @@ object Main {
 
     implicit val system = ActorSystem("ClusterSystem", config)
 
-    if (port != "0") {
-      // shard cluster member
-      val persistence: Persistence = new Persistence.StdOut
+    // shard cluster member
+    val persistence: Persistence = new Persistence.StdOut
 
-      ClusterSharding(system).start(
-        typeName = ProductEntity.shardTypeName,
-        entityProps = ProductEntity.props(persistence),
-        settings = ClusterShardingSettings(system),
-        extractEntityId = ProductEntity.extractEntityId,
-        extractShardId = ProductEntity.extractShardId
-      )
+    ClusterSharding(system).start(
+      typeName = ProductEntity.shardTypeName,
+      entityProps = ProductEntity.props(persistence),
+      settings = ClusterShardingSettings(system),
+      extractEntityId = ProductEntity.extractEntityId,
+      extractShardId = ProductEntity.extractShardId
+    )
 
-    } else {
+    if (port == "0") {
       import system.dispatcher
 
       val id = ProductId(UUID.randomUUID().toString)
 
-      after(10 seconds, system.scheduler)(for {
+      val result = after(20 seconds, system.scheduler)(for {
         client <- Future successful new ShardingClient
+        _ = println("putting...")
         _ <- client.put(id)
+        _ = println("getting...")
         product <- client.get(id)
-      } yield product) foreach { result =>
-        println(s"meep: $result")
+      } yield product)
+
+      result onComplete {
+        case Success(result) => println(s"meep: $result")
+        case Failure(e) => println(s"utter defeat: $e")
       }
     }
   }
