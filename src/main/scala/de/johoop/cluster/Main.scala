@@ -1,7 +1,6 @@
 package de.johoop.cluster
 
 import akka.actor.ActorSystem
-import akka.cluster.sharding
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.{Config, ConfigFactory}
 
@@ -17,12 +16,14 @@ object Main {
 
     val clusterSystem = ActorSystem("ClusterSystem", config)
 
+    val persistence: Persistence = new Persistence.StdOut
+
     ClusterSharding(clusterSystem).start(
       typeName = shardTypeName,
-      entityProps = ClusterActor.props,
+      entityProps = ProductEntity.props(persistence),
       settings = ClusterShardingSettings(clusterSystem),
-      extractEntityId = ClusterActor.extractEntityId,
-      extractShardId = ClusterActor.extractShardId
+      extractEntityId = ProductEntity.extractEntityId,
+      extractShardId = ProductEntity.extractShardId
     )
   }
 }
