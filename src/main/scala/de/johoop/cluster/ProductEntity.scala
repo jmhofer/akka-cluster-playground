@@ -21,6 +21,7 @@ object ProductEntity {
   private final case class Retrieved(origin: ActorRef, value: Option[ProductWithOffers]) extends Message
 
   val numberOfShards = 100
+  val shardTypeName = "ProductEntity"
 
   def extractEntityId: ShardRegion.ExtractEntityId = {
     case Put(product) => (product.id.str, product)
