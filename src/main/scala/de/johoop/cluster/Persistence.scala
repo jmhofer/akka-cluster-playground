@@ -13,12 +13,12 @@ trait Persistence {
 object Persistence {
   class StdOut extends Persistence {
     def store(product: ProductWithOffers)(implicit ec: ExecutionContext): Future[Done] = Future {
-      println(s"persisted to stdout: $product")
+      //println(s"persisted to stdout: $product")
       Done
     }
 
     def retrieve(id: ProductId): Future[Option[ProductWithOffers]] = {
-      println(s"failed to retrieve $id, because I'm too dumb")
+      //println(s"failed to retrieve $id, because I'm too dumb")
       Future successful None
     }
   }

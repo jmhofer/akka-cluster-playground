@@ -46,13 +46,13 @@ class ProductEntity(persistence: Persistence) extends Actor with ActorLogging {
   import ShardRegion.Passivate
   import context.dispatcher
 
-  context.setReceiveTimeout(120 second)
+  //context.setReceiveTimeout(120 second)
 
   def receive: Receive = receiveWithState(SoftReference(null))
 
   def receiveWithState(state: SoftReference[ProductWithOffers]): Receive = {
     case Put(product) =>
-      log info s"received Put($product)"
+      log debug s"received Put($product)"
       val origin = sender()
       persistence.store(product) map (_ => Persisted(origin, product)) pipeTo self
 
@@ -61,7 +61,7 @@ class ProductEntity(persistence: Persistence) extends Actor with ActorLogging {
       origin ! Done
 
     case Get(id) =>
-      log info s"received Get($id)"
+      log debug s"received Get($id)"
       val origin = sender()
       state.get match {
         case Some(product) => origin ! Some(product)
